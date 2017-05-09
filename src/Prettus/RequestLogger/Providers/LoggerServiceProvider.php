@@ -4,6 +4,8 @@ namespace Prettus\RequestLogger\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Prettus\RequestLogger\Helpers\Benchmarking;
+use Prettus\RequestLogger\Middlewares\ResponseLoggerMiddleware;
+use Prettus\RequestLogger\Middlewares\ResponseLoggerMiddlewareLaravel50;
 
 /**
  * Class LoggerServiceProvider
@@ -44,7 +46,13 @@ class LoggerServiceProvider extends ServiceProvider
         });
 
         $kernel = $this->app->make('Illuminate\Contracts\Http\Kernel');
-        $kernel->prependMiddleware(\Prettus\RequestLogger\Middlewares\ResponseLoggerMiddleware::class);
-    }
 
+        if(config('request-logger.version') >= 5.1) {
+            $loggerMiddleware = ResponseLoggerMiddleware::class;
+        } else {
+            $loggerMiddleware = ResponseLoggerMiddlewareLaravel50::class;
+        }
+
+        $kernel->prependMiddleware($loggerMiddleware);
+    }
 }
